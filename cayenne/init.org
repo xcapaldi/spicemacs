@@ -1,0 +1,65 @@
+#+TITLE: 🌶🌶🌶 Spicemacs Organic Cayenne 🌶🌶🌶
+#+AUTHOR: Xavier Capaldi
+
+* preliminaries
+** package and package-archives
+#+begin_src emacs-lisp :tangle yes
+(require 'package)
+(setq package-enable-at-startup nil) ; do not load packages before startup
+(setq package-archives '(("org" . "http://orgmode.org/elpa/")
+                         ("gnu" . "http://elpa.gnu.org/packages/")
+			 ("melpa" . "https://melpa.org/packages/")
+			 ("marmalade" . "http://marmalade-repo.org/packages/")))
+(package-initialize)
+#+end_src
+** bootstrap use-package
+#+begin_src emacs-lisp :tangle yes
+(unless (package-installed-p 'use-package) ; unless already installed
+  (package-refresh-contents) ; update package archives
+  (package-install 'use-package)) ; install most recent version of use-package
+(eval-when-compile
+  (require 'use-package-ensure)) ; initialize use-package and ensure packages in installed if necessary
+(setq use-package-always-ensure t)
+#+end_src
+* packages
+** core packages
+*** general
+A convenient method for binding keys in emacs.
+#+begin_src emacs-lisp :tangle yes
+(use-package general
+  :config
+  (general-create-definer leader-def
+    :states '(normal visual insert emacs)
+    :prefix "SPC"
+    :non-normal-prefix "M-SPC")
+
+  ;; keybinds
+    )
+#+end_src
+*** which-key
+Display available keybinding in a popup.
+#+begin_src emacs-lisp :tangle yes
+(use-package which-key
+  :init
+  (which-key-mode)
+  )
+#+end_src
+*** hydra
+Tie related commands in a repeatable family.
+#+begin_src emacs-lisp :tangle yes
+(use-package hydra
+  )
+#+end_src
+*** evil
+#+begin_src emacs-lisp :tangle yes
+;; extensible vi layer for emacs
+(use-package evil
+  :init
+  (evil-mode)
+  )
+#+end_src
+* customizations
+* tangle org to el on save
+;; Local Variables:
+;; eval: (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
+;; End:

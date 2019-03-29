@@ -1,7 +1,5 @@
-;;; init.el
-;;
-;; Author: Xavier Capaldi
-
+;;;  🌶🌶🌶 Spicemacs Habanero 🌶🌶🌶
+;;; Author: Xavier Capaldi
 ;;; License: MIT
 
 (setq delete-old-versions -1) ; delete backup versions silently
@@ -16,8 +14,6 @@
 (setq coding-system-for-write 'utf-8)
 (setq sentence-end-double-space nil) ; sentence should end with only a point
 
-;(auto-fill-mode t) ; need to add to hook to use this in a specific buffer
-(setq default-fill-column 88) ; toggle wrapping text at the 88th character
 ;; remove toolbar, menu and scroll bars
 (tool-bar-mode -1)
 (menu-bar-mode -1)
@@ -49,16 +45,11 @@
 
 ;; auto-package-update
 ;; automatically keep packaged updated
-;;(use-package auto-package-update
-;;  :config
-;;  (setq auto-package-update-delete-old-versions t)
-;;  (setq auto-package-update-hide-results t)
-;;  (auto-package-update-maybe))
-
-;; xresources-theme
-;; use .xresources as the Emacs theme
-(use-package xresources-theme
-  )
+(use-package auto-package-update
+  :config
+  (setq auto-package-update-delete-old-versions t)
+  (setq auto-package-update-hide-results t)
+  (auto-package-update-maybe))
 
 ;; general
 ;; a convenient method for binding keys in emacs
@@ -70,9 +61,6 @@
     :non-normal-prefix "M-SPC")
 
   ;; simple commands
-  ;;(leader-def "'" '(iterm-focus :which-key "iterm"))
-  ;;(leader-def "?" '(iterm-goto-filedir-or-home :which-key "iterm - goto dir"))
-  ;;(leader-def "/" 'counsel-ag)
   (leader-def "TAB" '(my/switch-to-previous-buffer :which-key "prev buffer"))
 
   ;; files
@@ -140,6 +128,8 @@
   (setq evil-operator-state-cursor '("red" hollow))
   )
 
+;; quality of life packages
+
 ;; avy
 ;; jump to visible text using char-based decision tree
 (use-package avy
@@ -180,126 +170,3 @@
   :general
   (leader-def "e" '(iedit-mode :which-key "iedit"))
   )
-
-;; these are not starting properly
-
-;; smartparens
-;; minor mode for dealing with pairs
-(use-package smartparens
-  :init
-  (smartparens-global-strict-mode)
-  )
-
-;; rainbow-delimiters
-;; highlight delimiters according to depth
-(use-package rainbow-delimiters
-  :init
-  (rainbow-delimiters-mode)
-  )
-
-;; markdown-mode
-;; major mode for editing markdown files
-(use-package markdown-mode
-  :mode (("README\\.md\\'" . gfm-mode) ;; assume github-flavored markdown for README
-	 ("\\.md\\'" . markdown-mode)
-	 ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "pandoc")
-  :general
-  (leader-def :keymaps 'markdown-mode-map "tl" '(markdown-insert-link :which-key "insert link")) ;; insert link
-  (leader-def :keymaps 'markdown-mode-map "ti" '(markdown-insert-image :which-key "insert image")) ;; insert image
-  (leader-def :keymaps 'markdown-mode-map "te" '(markdown-insert-italic :which-key "italicize")) ;; italicize
-  (leader-def :keymaps 'markdown-mode-map "tp" '(markdown-live-preview-mode :which-key "live preview"))
-  )
-
-;; blacken
-;; python autoformatter
-(use-package blacken 
-  :hook python-mode
-  :general
-  (leader-def :keymaps 'python-mode-map "tb" '(blacken-buffer :which-key "blacken buffer"))
-  )
-
-;;(use-package ein
-;;  :defer t)
-
-;; fill-column-indicator
-;; set indicator for the max column length
-;;(use-package fill-column-indicator
-;;  :hook python-mode
-;;  :general
-;;  (leader-def "w" '(my/wrapping :which-key "fill mode"))
-;;  :ensure t
-;;  :init
-;;  (fci-mode)
-;;  )
-
-;; custom command to turn on wrapping and the fill-column-indicator
-;;(defun my/wrapping ()
-;;  "turn on wrapping and fill-column-indicator"
-;;  (interactive)
-;;  (auto-fill-mode)
-;;  (fci-mode))
-
-;; Flycheck
-;; live python linting
-;;(use-package flycheck
-;;  )
-
-;; elpy
-;; python ide-like functionality
-;;(use-package elpy
-;;  )
-
-;; magit
-;; git porcelain
-;;(use-package magit
-;;  )
-
-;; ebib
-;; manage bibTeX and bibLaTeX database files
-(use-package ebib
-  :general
-  (leader-def "re" '(ebib :which-key "ebib"))
-  (leader-def "ri" '(ebib-insert-citation :which-key "insert ref")) ;; still needs work
-  :config
-  (setq ebib-preload-bib-files '("~/Dropbox/literature/library.bib")
-        ebib-bibtex-dialect 'BibTeX
-        ebib-file-associations '(("pdf" . "mupdf")("ps" . "gv"))
-        ebib-file-search-dirs '("~/Dropbox/literature")
-        ebib-autogenerate-keys nil
-        ebib-notes-directory "~/Dropbox/literature/notes"
-        ebib-reading-list-file "~/Dropbox/literature/reading-list.org"
-        )
-  (setq ebib-citation-commands
-	'((any (("cite"         "\\cite%<[%A]%>[%A]{%(%K%,)}")))
-	(org-mode (("ebib"         "[[ebib:%K][%D]]")))
-	(markdown-mode (("text"         "@%K%< [%A]%>")))))
-  )
-
-;; custom function to call python script for generating bibtex entry
-(defun my/doi-crossref (doi)
-  (interactive "MDOI: ")
-  (shell-command (concat "python3 /home/xavier/.emacs.d/doi-crossref.py " doi))
-  (switch-to-buffer "*Shell Command Output*")
-  (search-forward "{")
-  (downcase-word 1)
-  (search-forward "_")
-  (backward-char 1)
-  (delete-char 1)
-  (search-backward "{")
-  (forward-char 1)
-  (mark-word 1)
-  (copy-region-as-kill (region-beginning) (region-end))
-  (search-forward "doi")
-  (end-of-line)
-  (newline-and-indent)
-  (insert "file = {")
-  (yank)
-  (insert ".pdf},")
-  (search-forward "year = ")
-  (insert "{")
-  (forward-word 1)
-  (insert "}")
-  (beginning-of-buffer)
-  (kill-paragraph 1)
-  (kill-buffer-and-window))

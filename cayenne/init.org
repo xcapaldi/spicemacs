@@ -58,7 +58,7 @@ We also give use-package the authority to install any packages that are missing 
 #+end_src
 
 * packages
-** core packages
+** core
 *** general
 
 A convenient method for binding keys in emacs.
@@ -123,10 +123,10 @@ There is no additional configuration necessary here even in more complex setups.
   )
 #+end_src
 
-** motion packages
-** programming packages
+** motion
+** programming
 * customizations
-* tangle org to el on save
+* tangle .org to .el on save
 
 This command will automatically tangle this org file into your init.el file whenever you save.
 This should bring up a warning from emacs whenever you try to edit this file since you have to authorize this script to run.

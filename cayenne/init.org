@@ -1,30 +1,74 @@
 #+TITLE: 🌶🌶🌶 Spicemacs Organic Cayenne 🌶🌶🌶
 #+AUTHOR: Xavier Capaldi
 
+* license
+MIT License
+Copyright (c) 2019 Xavier Capaldi
+
+* how-to
+This is a minimal template for setting up an easy to read and configure vanilla emacs setup. 
+The only distinction between this template and Spicemacs Organic Jalapeno is that this includes Evil mode by default.
+
+At the end of this document is some code which will automatically tangle this org file into your init.el file upon saving.
+You should get a warning from emacs when you open this which you can safely ignore if you check the code and see that it is indeed safe.
+
+Each code block is self-contained and I separate each package into its own block.
+Since this version of Spicemacs is the bare minimum, all the packages here are required. You can add your own quite easily.
+In addition, if you want to disable a block you can simply change ~:tangle yes~ to ~:tangle no~. For example:
+
+#+begin_src emacs-lisp :tangle no
+(use-package leuven-theme)
+#+end_src
+
+The above code-block will *not* be tangled into your init.el file and thus won't affect your configuration.
+
+The packages used here absolutely wonderful and I highly recommend checking our their documentation directly.
+This template is supposed to be a nice system for a modular emacs configuration. 
+If you'd like some more complex example of how these packages can be combined, I suggest checking out the Habanero and Jolokia versions of Spicemacs.
+They contain many examples of how these can be configured. 
+
 * preliminaries
 ** package and package-archives
+
+We don't want packages to load at startup. We want to manage them all manually later with use-package.
+We can also set the package repositories here.
+
 #+begin_src emacs-lisp :tangle yes
 (require 'package)
-(setq package-enable-at-startup nil) ; do not load packages before startup
+(setq package-enable-at-startup nil)
 (setq package-archives '(("org" . "http://orgmode.org/elpa/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
 			 ("melpa" . "https://melpa.org/packages/")
 			 ("marmalade" . "http://marmalade-repo.org/packages/")))
 (package-initialize)
 #+end_src
+
 ** bootstrap use-package
+
+Check if use-package is installed. If not, install it. 
+We also give use-package the authority to install any packages that are missing in this config from our emacs.
+
 #+begin_src emacs-lisp :tangle yes
-(unless (package-installed-p 'use-package) ; unless already installed
+(unless (package-installed-p 'use-package)
   (package-refresh-contents) ; update package archives
-  (package-install 'use-package)) ; install most recent version of use-package
+  (package-install 'use-package))
 (eval-when-compile
-  (require 'use-package-ensure)) ; initialize use-package and ensure packages in installed if necessary
+  (require 'use-package-ensure))
 (setq use-package-always-ensure t)
 #+end_src
+
 * packages
 ** core packages
 *** general
+
 A convenient method for binding keys in emacs.
+We setup general's configuration using the ~:config~ wrapper here. 
+This means it won't set these setting's won't take effect until the package itself is loaded.
+The configuration here is minimal. We only declare a leader key for Evil and non-evil modes.
+We use spacebar (or spicebar) in the Evil-normal mode and meta-space for all other modes. 
+We don't define any keybinds.
+You can check the more configured versions of Spicemacs for some example keybinds.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package general
   :config
@@ -36,30 +80,58 @@ A convenient method for binding keys in emacs.
   ;; keybinds
     )
 #+end_src
+
 *** which-key
+
 Display available keybinding in a popup.
+This is an excellent package that integrates with general and removes the need to memorize keybinds.
+There is no additional configuration necessary here even in more complex setups.
+We will just use the wrapper in the general declarations. 
+
 #+begin_src emacs-lisp :tangle yes
 (use-package which-key
   :init
   (which-key-mode)
   )
 #+end_src
+
 *** hydra
+
 Tie related commands in a repeatable family.
+This may seem unnecessary as it duplicates much of the functionality of general and which-key.
+However general requires the full sequence everytime the command is run. 
+For example, if you bind flycheck's next error command to SPC-p-f (Spacebar - programming - flycheck) and you want to jump three errors, you have to repeat that entire sequence three times.
+With hydra you can define it as a hydra but still call it from general.
+So instead of typing SPC-p-f SPC-p-f SPC-p-f you can simply type SPC-p-f f f. 
+For examples of this in use, check the more configured Spicemacs versions like Habanero or Jolokia.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package hydra
   )
 #+end_src
+
 *** evil
-#+begin_src emacs-lisp :tangle yes
+
+This allows the use of vim motion in emacs. 
+It integrates fairly well although you will still need to know the basics of emacs.
+There is no additional configuration necessary here even in more complex setups.
+
+#+begin_src emacs-lisp :tangle yes 
 ;; extensible vi layer for emacs
 (use-package evil
   :init
   (evil-mode)
   )
 #+end_src
+
+** motion packages
+** programming packages
 * customizations
 * tangle org to el on save
+
+This command will automatically tangle this org file into your init.el file whenever you save.
+This should bring up a warning from emacs whenever you try to edit this file since you have to authorize this script to run.
+
 ;; Local Variables:
 ;; eval: (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
 ;; End:

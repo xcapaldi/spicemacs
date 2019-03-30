@@ -1,17 +1,17 @@
 
 (require 'package)
-(setq package-enable-at-startup nil) ; do not load packages before startup
+(setq package-enable-at-startup nil)
 (setq package-archives '(("org" . "http://orgmode.org/elpa/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")))
 (package-initialize)
 
-(unless (package-installed-p 'use-package) ; unless already installed
+(unless (package-installed-p 'use-package)
   (package-refresh-contents) ; update package archives
-  (package-install 'use-package)) ; install most recent version of use-package
+  (package-install 'use-package))
 (eval-when-compile
-  (require 'use-package-ensure)) ; initialize use-package and ensure packages in installed if necessary
+  (require 'use-package-ensure))
 (setq use-package-always-ensure t)
 
 (use-package general

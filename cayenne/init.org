@@ -117,7 +117,6 @@ It integrates fairly well although you will still need to know the basics of ema
 There is no additional configuration necessary here even in more complex setups.
 
 #+begin_src emacs-lisp :tangle yes 
-;; extensible vi layer for emacs
 (use-package evil
   :init
   (evil-mode)

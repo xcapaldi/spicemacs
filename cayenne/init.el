@@ -32,7 +32,6 @@
 (use-package hydra
   )
 
-;; extensible vi layer for emacs
 (use-package evil
   :init
   (evil-mode)

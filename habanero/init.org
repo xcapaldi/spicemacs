@@ -77,12 +77,15 @@ We can add package specific commands in their own use-package declaration.
     :non-normal-prefix "M-SPC")
 
   ;; simple commands
-  (leader-def "TAB" '(my/switch-to-previous-buffer :which-key "prev buffer"))
+   (leader-def "TAB" '((lambda ()
+		      (interactive)
+		      (switch-to-buffer (other-buffer (current-buffer) 1)))
+    :which-key "prev buffer"))
 
   ;; files
   (leader-def "f" '(:ignore t :which-key "files"))
 
-  ;; buffer
+  ;; buffer (note that this can be replaced by the ace-window package detailed in motion)
   (leader-def "b" '(:ignore t :which-key "buffer"))
   (leader-def "bo" '(other-window :which-key "switch window"))
   (leader-def "bk" '(kill-buffer :which-key "kill buffer"))
@@ -102,15 +105,6 @@ We can add package specific commands in their own use-package declaration.
   )
 #+end_src
 
-Custom command to switch between two most recently opened buffers.
-
-#+begin_src emacs-lisp tangle: yes
-(defun my/switch-to-previous-buffer ()
-  "Switch to previously open buffer. Repeated invocations toggle between the two most recently open buffers."
-  (interactive)
-  (switch-to-buffer (other-buffer (current-buffer) 1)))
-#+end_src
-
 *** which-key
 
 Display available keybinding in a popup.
@@ -125,7 +119,7 @@ We will just use the wrapper in the general declarations.
   )
 #+end_src
 
-*** TODO hydra
+*** hydra
     
 Tie related commands in a repeatable family.
 This may seem unnecessary as it duplicates much of the functionality of general and which-key.
@@ -133,7 +127,7 @@ However general requires the full sequence everytime the command is run.
 For example, if you bind flycheck's next error command to SPC-p-f (Spacebar - programming - flycheck) and you want to jump three errors, you have to repeat that entire sequence three times.
 With hydra you can define it as a hydra but still call it from general.
 So instead of typing SPC-p-f SPC-p-f SPC-p-f you can simply type SPC-p-f f f. 
-For examples of this in use, check the more configured Spicemacs versions like Habanero or Jolokia.
+For an example, look at the ace-window configuration which uses a hydra
 
 #+begin_src emacs-lisp :tangle yes
 (use-package hydra
@@ -179,22 +173,52 @@ We add shortcuts to very easily jump to the first letter of a word or a particul
   )
 #+end_src
 
-*** TODO ace-window
+*** ace-window
 
-Jump to window using char-based decision tree.
-By pressing ? in this ace-window mode, you can see other options to managing windows.
-I haven't yet determined if I can just integrate this with which-key...
+Ace-window alone allows jumping to windows using char-based decision trees.
+We integrate it here with a hydra along with windows movements and buffer control.   
+You will notice that this doesn't use which-key in the hydra itself as it has its own functionality.
+In addition, the options which are blue, denote options which will exit the hydra.
 
-~SPC-w-char~ "jump to window starting with this char"
+~SPC-w-char~ "jump to window starting with this char and activate hydra"
 
 #+begin_src emacs-lisp tangle: yes
+;; ace-window
+;; quickly switch windows in emacs
 (use-package ace-window
   :config
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?l))
+  (defhydra hydra-window ()
+    "window"
+    ("h" windmove-left)
+    ("j" windmove-down)
+    ("k" windmove-up)
+    ("l" windmove-right)
+    ("v" (lambda ()
+	   (interactive)
+	   (split-window-below)
+	   (windmove-down))
+     "vert")
+    ("b" (lambda ()
+	   (interactive)
+	   (split-window-right)
+	   (windmove-right))
+     "horz")
+    ("o" delete-other-windows "one" :color blue)
+    ("a" ace-window "ace")
+    ("s" ace-swap-window "swap")
+    ("d" ace-delete-window "del")
+    ("m" maximize-window "max" :color blue)
+;;    ("n" ivy-switch-buffer "buf") ;; ruins modularity in this package
+    ("q" nil "cancel")
+    )
   :general
-  (leader-def "w" '(ace-window :which-key "switch window"))
+  (leader-def "w" '(hydra-window/ace-window :which-key "window"))
   )
 #+end_src
+
+Notice that the ivy-switch-buffer command would ruin modularity in this package.
+If you like that functionality, you can reenable it but just take note.
 
 *** ivy
 

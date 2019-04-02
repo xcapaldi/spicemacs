@@ -22,12 +22,15 @@
     :non-normal-prefix "M-SPC")
 
   ;; simple commands
-  (leader-def "TAB" '(my/switch-to-previous-buffer :which-key "prev buffer"))
+   (leader-def "TAB" '((lambda ()
+                      (interactive)
+                      (switch-to-buffer (other-buffer (current-buffer) 1)))
+    :which-key "prev buffer"))
 
   ;; files
   (leader-def "f" '(:ignore t :which-key "files"))
 
-  ;; buffer
+  ;; buffer (note that this can be replaced by the ace-window package detailed in motion)
   (leader-def "b" '(:ignore t :which-key "buffer"))
   (leader-def "bo" '(other-window :which-key "switch window"))
   (leader-def "bk" '(kill-buffer :which-key "kill buffer"))

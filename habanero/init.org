@@ -178,6 +178,24 @@ We add shortcuts to very easily jump to the first letter of a word or a particul
   (leader-def "g" '(avy-goto-line :which-key "go to line"))
   )
 #+end_src
+
+*** TODO ace-window
+
+Jump to window using char-based decision tree.
+By pressing ? in this ace-window mode, you can see other options to managing windows.
+I haven't yet determined if I can just integrate this with which-key...
+
+~SPC-w-char~ "jump to window starting with this char"
+
+#+begin_src emacs-lisp tangle: yes
+(use-package ace-window
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?l))
+  :general
+  (leader-def "w" '(ace-window :which-key "switch window"))
+  )
+#+end_src
+
 *** ivy
 
 Generic completion mechanism for menus.
@@ -249,18 +267,15 @@ Then enter the same key sequence to exit iedit mode.
   )
   #+end_src
 ** appearance
-*** TODO leuven-theme
+*** leuven-theme
 
 This is an excellent theme which I can highly recommend.
 It is very thorough and has nice aesthetics for the most popular emacs modes.
-In addition we make shortcuts to switch between the light and dark modes...
+It also has a dark mode.
 
-#+begin_src emacs-lisp tangle: yes
+#+begin_src emacs-lisp tangle: no
 (use-package leuven-theme
   :init (load-theme 'leuven)
-  ;;:general
-  ;;(leader-def ">" '('(load-theme leuven) :which-key "light theme"))
-  ;;(leader-def "<" '('(load-theme leuven-dark) :which-key "dark theme"))
   )
 #+end_src
 
@@ -277,7 +292,7 @@ It is set currently to automatically operate in programming modes.
   )
 #+end_src
 
-*** TODO highlight-indent-guides
+*** highlight-indent-guides
 
 Highlight depth of indentation.
 Can be customized more thoroughly...

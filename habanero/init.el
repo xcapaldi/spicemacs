@@ -30,6 +30,9 @@
   ;; files
   (leader-def "f" '(:ignore t :which-key "files"))
 
+  ;; zoom
+  (leader-def "+" '(text-scale-adjust "zoom"))
+
   ;; buffer (note that this can be replaced by the ace-window package detailed in motion)
   (leader-def "b" '(:ignore t :which-key "buffer"))
   (leader-def "bo" '(other-window :which-key "switch window"))

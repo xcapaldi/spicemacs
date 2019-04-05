@@ -58,7 +58,7 @@ We also give use-package the authority to install any packages that are missing 
 
 * packages
 ** core
-*** general
+*** COMMENT general
 
 A convenient method for binding keys in emacs.
 We setup general's configuration using the ~:config~ wrapper here. 
@@ -69,40 +69,43 @@ We can add package specific commands in their own use-package declaration.
 
 
 #+begin_src emacs-lisp :tangle yes
-(use-package general
-  :config
-  (general-create-definer leader-def
-    :states '(normal visual insert emacs)
-    :prefix "SPC"
-    :non-normal-prefix "M-SPC")
+  (use-package general
+    :config
+    (general-create-definer leader-def
+      :states '(normal visual insert emacs)
+      :prefix "SPC"
+      :non-normal-prefix "M-SPC")
 
-  ;; simple commands
-   (leader-def "TAB" '((lambda ()
-		      (interactive)
-		      (switch-to-buffer (other-buffer (current-buffer) 1)))
-    :which-key "prev buffer"))
+    ;; simple commands
+     (leader-def "TAB" '((lambda ()
+                        (interactive)
+                        (switch-to-buffer (other-buffer (current-buffer) 1)))
+      :which-key "prev buffer"))
 
-  ;; files
-  (leader-def "f" '(:ignore t :which-key "files"))
+    ;; files
+    (leader-def "f" '(:ignore t :which-key "files"))
 
-  ;; buffer (note that this can be replaced by the ace-window package detailed in motion)
-  (leader-def "b" '(:ignore t :which-key "buffer"))
-  (leader-def "bo" '(other-window :which-key "switch window"))
-  (leader-def "bk" '(kill-buffer :which-key "kill buffer"))
+    ;; zoom
+    (leader-def "+" '(text-scale-adjust "zoom"))
 
-  ;; modes
-  (leader-def "w" '(auto-fill-mode :which-key "fill mode"))
+    ;; buffer (note that this can be replaced by the ace-window package detailed in motion)
+    (leader-def "b" '(:ignore t :which-key "buffer"))
+    (leader-def "bo" '(other-window :which-key "switch window"))
+    (leader-def "bk" '(kill-buffer :which-key "kill buffer"))
 
-  ;; reserved keys for mode-specific bindings
-  ;; navigation
-  (leader-def "t" '(:ignore t :which-key "editing"))
+    ;; modes
+    (leader-def "w" '(auto-fill-mode :which-key "fill mode"))
 
-  ;; compilation
-  (leader-def "c" '(:ignore t :which-key "compilation"))
+    ;; reserved keys for mode-specific bindings
+    ;; navigation
+    (leader-def "t" '(:ignore t :which-key "editing"))
 
-  ;; error checking
-  (leader-def "x" '(:ignore t :which-key "error"))
-  )
+    ;; compilation
+    (leader-def "c" '(:ignore t :which-key "compilation"))
+
+    ;; error checking
+    (leader-def "x" '(:ignore t :which-key "error"))
+    )
 #+end_src
 
 *** which-key
@@ -289,7 +292,29 @@ Then enter the same key sequence to exit iedit mode.
   :general
   (leader-def "e" '(iedit-mode :which-key "iedit"))
   )
-  #+end_src
+#+end_src
+
+*** expand-region
+
+Expand region increases the selected region by semantic units.
+This is super convenient and allows you to quickly expand and contract your selection using a hydra.
+
+~SPC-e~ "expand selection"
+~SPC-c~ "contract selection"
+
+#+begin_src emacs-lisp tangle: yes
+(use-package expand-region
+  :config
+  (defhydra hydra-expand ()
+    "expand region"
+    ("e" er/expand-region)
+    ("c" er/contract-region))
+  :general
+  (leader-def "e" '(hydra-expand/er/expand-region :which-key "expand"))
+;;(leader-def "c" '(hydra-expand/er/contract-region :which-key "contract")) ;; you could do something like this if you prefer
+  )
+#+end_src
+
 ** appearance
 *** leuven-theme
 
@@ -327,6 +352,7 @@ Can be customized more thoroughly...
   :hook (prog-mode . highlight-indent-guides-mode)
   )
 #+end_src
+
 
 ** utility
 *** TODO smartparens

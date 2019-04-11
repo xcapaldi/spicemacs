@@ -1,0 +1,15 @@
+* markdown-mode
+
+#+begin_src emacs-lisp tangle: yes
+(use-package markdown-mode
+  :mode (("README\\.md\\'" . gfm-mode) ;; assume github-flavored markdown for README
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "pandoc") ;; or whatever markdown compiler you prefer
+  :general 
+  (leader-def :keymaps 'markdown-mode-map "tl" '(markdown-insert-link :which-key "insert link"))
+  (leader-def :keymaps 'markdown-mode-map "ti" '(markdown-insert-image :which-key "insert image"))
+  (leader-def :keymaps 'markdown-mode-map "te" '(markdown-insert-italic :which-key "italicize"))
+  (leader-def :keymaps 'markdown-mode-map "tp" '(markdown-live-preview-mode :which-key "live preview"))
+  )
+#+end_src

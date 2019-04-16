@@ -1,0 +1,38 @@
+* bibtex management and paper writing
+
+** auctex
+
+Package for working with LaTeX files. 
+Has syntax highlighting, folding, inline previewing.
+Can compile and just to error locations in source code.
+
+** reftex
+
+Package for managing labels, references, citations and index entries in LaTeX.
+No special support for managing bibtex file.
+
+** org-ref
+
+Plugin which allows easy import into a bibtex file and full citation management in
+org-files which can later be compiled to LaTeX or pdf for publication.
+Main disadvantage is that it only works in org-mode, so you can't use its features in a
+raw LaTeX document.
+It doesn't seem to rely on a central bibtex database but instead expects you to prepare
+one for the document on hand (I am not sure yet if this is true).
+
+** ebib
+
+Full software written to run in emacs.
+It allows management of bibtex databases.
+References can be imported into a variety of formats although some time must be taken to
+setup.
+There are no special functions for easy import.
+Notetaking and filtering capabilities.
+
+** org-mode
+
+In principle a bibtex database can be managed almost entirely in org-mode itself.
+Drawers can hold entries, pdfs can be linked, the raw bib file can be parsed from the
+org document.
+Notes can be inline.
+Sorting is probably not trivial.

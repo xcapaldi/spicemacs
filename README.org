@@ -225,4 +225,6 @@ Then you can put your config into org-mode with each package in its own source c
 ** TODO Applications
 ** TODO SpicEmacs and Cheese
 Recipe still in the test labs!
-** TODO License
+** License
+This guide is released under the MIT license.
+Feel free to do with it as you please.

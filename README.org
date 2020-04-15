@@ -175,10 +175,7 @@ In this way, if we choose to remove blacken at later date, nothing needs to be c
 Everything is self-contained!
 You see how with some effort, *hydra* can easily replace (surpass) *which-key*.
 
-** Running emacs as a daemon
-Fast start
-*** Keeping configuration in org file
-Necessary
+** TODO Running emacs as a daemon
 ** TODO Vi mode (Evil)
 *** Evil escape key
 *** Evil collection

@@ -1,0 +1,228 @@
+* SpicEmacs 🌶
+A minimalist guide to configuring vanilla Emacs for your needs.
+You decide how spicy you want it to be!
+
+** Philosophy
+Emacs is clunky, old-fashioned and downright arcane.
+It doesn't claim the home-row comfort or quick command line interface of vim (by default).
+The real strength of Emacs lies in its extensibility.
+This is not a prebuilt Emacs configuration and is certainly not competing with Spacemacs or Doom Emacs. 
+It is for people who would enjoy installing a minimal Linux system or compiling their own terminal.
+If you want a batteries-included text-editor, use something like Geany, Atom or VSCode.
+Unfortunately, configuring vanilla Emacs can be overwhelming.
+The goal of this guide is merely to provide direction and structure for your configuration.
+
+You *will* need to read the documentation of packages as you go. 
+
+This guide is split in to a few key sections.
+There are a set of core packages which I consider vital for any configuration.
+Evil, the Vi emulation mode is covered separately since it will only be considered essential by some users.
+Finally there are sections on Movement, Searching and Selection, Themes, General Configuration and Applications.
+None of these are required and they serve more as suggestions of packages to check out.
+
+If you're split about using Emacs, I recommend reading the relevant sections in The Art of Unix Programming by Eric Raymond: [[http://www.catb.org/esr/writings/taoup/html/ch13s02.html#emacs_editing][Emacs]] and [[http://www.catb.org/esr/writings/taoup/html/ch13s03.html#id2967765][Is Emacs an Argument against the Unix Tradition?]] (also consider supporting his work on [[https://www.patreon.com/esr][Patreon]])
+
+** Core packages
+*** [[https://github.com/raxod502/straight.el][Straight]]
+Emacs uses package.el by default to manage packages.
+*Straight* is a modern functional package manager which gives you much greater control over your packages.
+You can even edit their source directly if you want.
+You may consider this unnecessary, especially for a novice Emacs user, however my goal for this guide is that you will have a configuration that you can easily expand as you gain greater knowledge and experience.
+*Straight* works out of the box without issues.
+If you you're starting from a blank config, you can bootstrap *straight* like this:
+
+#+BEGIN_SRC elisp
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        (bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+#+END_SRC
+
+If you already have a configuration and want to convert, [[https://github.crookster.org/switching-to-straight.el-from-emacs-26-builtin-package.el/][check out this guide]].
+
+*** [[https://github.com/jwiegley/use-package][Use-package]]
+John Wiegley wrote this excellent package which serves as the structural foundation of the configuration.
+Almost everything in your configuration can be contained within *use-package* blocks.
+Not only does this keep your configuration tidy but since *use-package* defers loading packages until necessary, you can significantly decrease your load time as well. 
+
+If you're using straight, you can set this in your config to install use-package:
+
+#+BEGIN_SRC elisp
+(straight-use-package 'use-package)
+#+END_SRC
+
+Optionally, you can tell straight and use-package to automatically install all your packages but I prefer manually setting the flag as necessary.
+If you do want this functionality:
+
+#+BEGIN_SRC elisp
+  (setq straight-use-package-by-default t)
+#+END_SRC
+
+You will see examples of *use-package* in the upcoming sections since it is used to manage everything else.
+
+*** [[https://github.com/noctuid/general.el][General]]
+This package is designed to simplify keybindings for Evil and non-Evil Emacs users.
+
+#+BEGIN_SRC elisp
+  (use-package general
+    :straight t)
+#+END_SRC
+
+Notice the *:straight t* which tells *straight* to install general if it isn't already.
+
+*General* is capable of defining leader keys which are pre-cursors to other keybindings:
+
+#+BEGIN_SRC elisp
+  (use-package general
+    :straight t
+    :config
+    (general-create-definer leader-def
+      :prefix "C-c"))
+#+END_SRC
+
+If you're using Evil:
+
+#+BEGIN_SRC elisp
+  (use-package general
+    :straight t
+    :config
+    (general-create-definer leader-def
+      :states '(normal visual insert emacs)
+      :prefix "SPC"
+      :non-normal-prefix "M-SPC"))
+#+END_SRC
+
+Using the *:general* keyword in use-package, you can easily define package-specific keybindings:
+Here is an example:
+
+#+BEGIN_SRC elisp
+  (use-package ivy
+    :straight t
+    :general
+    (leader-def "bs" '(ivy-switch-buffer)))
+#+END_SRC
+
+This package has so much more functionality than I've covered here.
+In particular check out the *:ghook* and *:gfhook* keywords.
+Also look at *general-setq*.
+
+*** [[https://github.com/justbur/emacs-which-key][Which-key]]
+Display keybindings based on initial input.
+
+#+BEGIN_SRC elisp
+  (use-package which-key
+    :straight t
+    :init
+    (which-key-mode))
+#+END_SRC
+
+While not truly essential, this package requires minimal configuration and can be a great help remember keybinding for different situations.
+It also ties directly into *general*:
+
+#+BEGIN_SRC elisp
+  (use-package blacken 
+    :straight t
+    :general
+    (leader-def :keymaps 'python-mode-map "tb" '(blacken-buffer :which-key "blacken buffer")))
+#+END_SRC
+
+Personally I prefer *hydra* for most use-cases but you get a lot of functionality from *which-key* with little effort.
+The two packages overlap but are suited to different situations.
+
+*** [[https://github.com/abo-abo/hydra][Hydra]]
+Create keybinding menus with persistent binds that can be repeated without closing the menu.
+This package was written by the prolific abo-abo (seriously, look at the commit history).
+
+#+BEGIN_SRC elisp
+  (use-package hydra
+    :straight t)
+#+END_SRC
+
+Like *general*, hydra is a large package that holds a lot of functionality so be sure to check out the documentation.
+
+The real power of hydratics comes with the 0.15.0 release: [[https://oremacs.com/2019/05/18/hydra-0.15.0/][Adding heads to existing hydra]]
+With this update, you can add additional heads to a hydra from within the *use-package* configuration for each package.
+
+#+BEGIN_SRC elisp
+  (use-package python
+    :straight t
+    :config
+    (defhydra hydra-python ()
+      ("j" python-nav-forward-defun "next func")
+      ("k" python-nav-backward-defun "prev func"))
+    :general
+    (leader-def "D" 'hydra-python/body))
+
+  (use-package blacken 
+    :straight t
+    :config
+    (defhydra+ hydra-python ()
+      ("b" blacken-buffer "blacken" :color blue)))
+#+END_SRC
+
+You see how modular you configuration becomes.
+Within the first *use-package* declaration for python we set the hydra that we will use for all python related bindings along with a keybinding.
+Then later we add blacken and can simply attach the function we want to a new head for the original hydra body.
+In this way, if we choose to remove blacken at later date, nothing needs to be changed in our overal python configuration.
+Everything is self-contained!
+You see how with some effort, *hydra* can easily replace (surpass) *which-key*.
+
+** Running emacs as a daemon
+Fast start
+*** Keeping configuration in org file
+Necessary
+** TODO Vi mode (Evil)
+*** Evil escape key
+*** Evil collection
+** Org-mode configuration
+As you've seen in the core packages above, even in plain elisp, you configuration can be highly modular.
+It is possible to use Org-mode to store and manage your configuration.
+There are a few advantages:
+
+- You can disable packages by putting *:eval no* into their source code header
+- You can take full advantage of Org-mode's hierarchical structure
+- You can add as much text describing your configuration as you want
+- It is easier to publish your configuration in a human-readable format
+
+To do this, you still need an init.el file with the following code:
+
+#+BEGIN_SRC elisp
+  ;; Bootstrap straight.el
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        (bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+
+  ;; Use straight.el to install use-package
+  (straight-use-package 'use-package)
+
+  ;; Tangle configuration using org-babel
+  (org-babel-load-file "~/dotfiles/emacs/config.org")
+#+END_SRC
+
+Then you can put your config into org-mode with each package in its own source code block.
+
+** TODO Movement
+*** Avy
+** TODO Searching and selection
+** TODO Themes
+** TODO Applications
+** TODO SpicEmacs and Cheese
+Recipe still in the test labs!
+** TODO License

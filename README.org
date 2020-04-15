@@ -4,7 +4,7 @@ You decide how spicy you want it to be!
 
 ** Philosophy
 Emacs is clunky, old-fashioned and downright arcane.
-It doesn't claim the home-row comfort or quick command line interface of vim (by default).
+It doesn't claim the home-row comfort or quick command line interface of vi(m) (by default).
 The real strength of Emacs lies in its extensibility.
 This is not a prebuilt Emacs configuration and is certainly not competing with Spacemacs or Doom Emacs. 
 It is for people who would enjoy installing a minimal Linux system or compiling their own terminal.
@@ -16,7 +16,7 @@ You *will* need to read the documentation of packages as you go.
 
 This guide is split in to a few key sections.
 There are a set of core packages which I consider vital for any configuration.
-Evil, the Vi emulation mode is covered separately since it will only be considered essential by some users.
+Evil, the vi emulation mode is covered separately since it will only be considered essential by some users.
 Finally there are sections on Movement, Searching and Selection, Themes, General Configuration and Applications.
 None of these are required and they serve more as suggestions of packages to check out.
 
@@ -171,14 +171,126 @@ With this update, you can add additional heads to a hydra from within the *use-p
 You see how modular you configuration becomes.
 Within the first *use-package* declaration for python we set the hydra that we will use for all python related bindings along with a keybinding.
 Then later we add blacken and can simply attach the function we want to a new head for the original hydra body.
-In this way, if we choose to remove blacken at later date, nothing needs to be changed in our overal python configuration.
+In this way, if we choose to remove blacken at a later date, nothing needs to be changed in our overal python configuration.
 Everything is self-contained!
 You see how with some effort, *hydra* can easily replace (surpass) *which-key*.
 
-** TODO Running emacs as a daemon
-** TODO Vi mode (Evil)
-*** Evil escape key
-*** Evil collection
+** Vi emulation mode ([[https://github.com/emacs-evil/evil][Evil]])
+*Evil* is an excellent emulation of vi/vim in Emacs.
+
+#+BEGIN_SRC elisp
+  (use-package evil
+    :straight t
+    :init
+    (evil-mode))
+#+END_SRC
+
+Like the previous packages, it has a lot of functionality.
+Luckily most of that is contained within the *general* package so you can rely on that for your keybinds with *Evil*.
+For actual text editing, Evil pretty much works out of the box like vi(m).
+The real challenge is extending the Evil methodology to other Emacs packages like Elfeed or Org-mode.
+You can use C-z to toggle between Evil and Emacs mode which allows you to use the default Emacs keybinding.
+However, I recommend using a combination of rebinding keys and leader + hydra to get everything working nicely.
+
+Here is an example with Elfeed (RSS reader) where I've rebound keys using *general* to work with Evil:
+
+#+BEGIN_SRC elisp
+  (use-package elfeed
+    :straight t
+    :init
+    (evil-set-initial-state 'elfeed-search-mode 'normal)
+    (evil-set-initial-state 'elfeed-entry-mode 'normal)
+    :general
+    (:states 'normal :keymaps 'elfeed-search-mode-map "RET" 'elfeed-search-show-entry)
+    (:states 'normal :keymaps 'elfeed-search-mode-map "/" 'elfeed-search-set-filter)
+    (:states 'normal :keymaps 'elfeed-show-mode-map "q" '(lambda () (interactive) (kill-buffer (current-buffer))))
+    (:states 'normal :keymaps 'elfeed-search-mode-map "d" 'elfeed-search-untag-all-unread)
+    (:states 'normal :keymaps 'elfeed-search-mode-map "u" 'elfeed-search-tag-all-unread)
+    (:states 'normal :keymaps 'elfeed-search-mode-map "o" 'elfeed-search-browse-url)
+    (:states 'normal :keymaps 'elfeed-search-mode-map "c" 'elfeed-search-clear-filter))
+#+END_SRC
+
+You see that you can quickly bind keys such that they are only active in certain combinations of emacs mode and *Evil* state.
+
+If the prospect of doing this for each package is tedious, check out [[https://github.com/emacs-evil/evil-collection][Evil collection]].
+It's a collection of bindings for many Emacs packages.
+I don't actually install it, I just use it as a reference for packages as I need them.
+
+The creater of *general* also wrote a significant guide to *Evil* [[https://github.com/noctuid/evil-guide][here]].
+
+** General configuration settings
+Here are some general settings which will probably ease your transition into emacs:
+
+Wrap lines instead of extending them past your view.
+
+#+BEGIN_SRC elisp
+  (global-visual-line-mode 1)
+#+END_SRC
+
+You can turn off components of the GUI that you don't want.
+You may decide to keep the menu bar while you're still learning.
+I highly recommend removing the tool bar though because it takes a lot of space for little functionality.
+
+#+BEGIN_SRC elisp
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+#+END_SRC
+
+I prefer a visual bell instead of an audio bell for errors.
+If you don't want a bell at all, just set *ring-bell-function* to *'ignore*.
+
+#+BEGIN_SRC elisp
+  (setq ring-bell-function 1)
+  (setq visible-bell t)
+#+END_SRC
+
+Use UTF-8 by default:
+
+#+BEGIN_SRC elisp
+  (setq coding-system-for-read 'utf-8)
+  (setq coding-system-for-write 'utf-8)
+#+END_SRC
+
+Remove the default emacs start screen:
+
+#+BEGIN_SRC elisp
+  (setq inhibit-startup-screen t)
+#+END_SRC
+
+Don't ask for confirmation when following symlinked files:
+
+#+BEGIN_SRC elisp
+  (setq vc-follow-symlinks t)
+#+END_SRC
+
+Store all emacs backup files in one location and automatically delete old versions:
+
+#+BEGIN_SRC elisp
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
+        backup-by-copying t
+        version-control t
+        delete-old-versions t
+        kept-new-versions 20
+        kept-old-versions 5)
+#+END_SRC
+
+** Running emacs as a daemon
+It's possible to run emacs like a daemon.
+This have several advantages.
+Primarily, it will speed up how fast individual emacs clients launch since they're connecting to an already active daemon.
+In addition, this works very nicely with tiling window managers because you can have emacs with your rss feeds in a workspace, emacs with your mail in another and emacs with your currect project in yet another.
+All three instances are connected to the same client.
+I find daemonized emacs synergizes well with the tiling window manager workflow.
+
+The only disadvantage I've encountered thus far, is with the colorschemes.
+I use pywal to configure my system colors and I use ewal to bring that configuration into emacs.
+However, ewal only runs at launch so if I change my colorscheme during the day, I have to kill all my emacs clients and then restart to update the colorscheme in emacs.
+It's a small price to pay.
+
+Checkout [[https://www.emacswiki.org/emacs/EmacsAsDaemon][Emacs As Daemon]] if you are interested.
+It's very easy to setup on a GNU/Linux system.
+
 ** Org-mode configuration
 As you've seen in the core packages above, even in plain elisp, you configuration can be highly modular.
 It is possible to use Org-mode to store and manage your configuration.
@@ -215,11 +327,73 @@ To do this, you still need an init.el file with the following code:
 
 Then you can put your config into org-mode with each package in its own source code block.
 
-** TODO Movement
-*** Avy
-** TODO Searching and selection
-** TODO Themes
-** TODO Applications
+** Movement
+All of the following are Abo-abo's packages.
+*** [[https://github.com/abo-abo/avy][Avy]]
+This package allows you to rapidly jump around text using functionality similar to link highlighting in qutebrowser.
+Once you've started using this, you will be amazed how quickly you can move and edit.
+*** [[https://github.com/abo-abo/ace-window][Ace-window]]
+Same idea as Avy but applied to moving between Emacs windows.
+*** [[https://github.com/abo-abo/ace-link][Ace-link]]
+And again for following links.
+** Search and completion
+There are two popular ecosystems for searching and completion in emacs.
+I prefer Abo-abo's [[https://github.com/abo-abo/swiper][Ivy]] over [[https://github.com/emacs-helm/helm][Helm]] because it's more simple and still suits my needs.
+Check both out and see which you like best.
+I have not used Helm extensively so I can't comment on it.
+
+The Ivy ecosystem consists of ivy (the completion mechanism), counsel (replace some built-in emacs functions) and swiper (an alternative to isearch using ivy).
+
+Many packages build off of Ivy or Helm and they are both powerful tools.
+
+** Themes and fonts
+Emacs has several themes by default.
+I recommend Leuven since it has good settings for Org-mode.
+
+#+BEGIN_SRC elisp
+  (load-theme 'leuven)
+#+END_SRC
+
+Alternatively, you can find many other themes online, including the popular ones (Solarized, Gruvbox, Dracula ...)
+
+Personally, I use pywal to configure the colors on my system so I use [[https://gitlab.com/jjzmajic/ewal][ewal]] which can theme emacs based on that.
+
+#+BEGIN_SRC elisp
+  (use-package ewal
+    :straight t
+    :init
+    (setq ewal-use-built-in-always-p nil
+          ewal-use-built-in-on-failure-p t
+          ewal-built-in-palette "sexy-material"))
+#+END_SRC
+
+You can also add customizations to your theme which is great for Org-mode.
+In particular, it's nice to adjust the size of the headers.
+I recommend reading this blog post on the topic: [[https://zzamboni.org/post/beautifying-org-mode-in-emacs/][Beautifying Org-mode in Emacs]]
+
+You can also configure your fonts.
+The blog post above has a complex setup with multiple fonts but I just used something simple initially:
+
+#+BEGIN_SRC elisp
+  (add-to-list 'default-frame-alist
+               '(font . "Fira Mono-10"))
+#+END_SRC
+
+** Applications
+There are several fully fledged "applications" which can run in emacs.
+These are just a few examples.
+I consider them applications largely because they do things that truly fall outside the scope of a text editor.
+*** [[https://github.com/joostkremers/ebib][Ebib]]
+BibTeX database manager.
+Probably the best implementation I've ever seen if you need to manage many references.
+*** [[https://github.com/skeeto/elfeed][Elfeed]]
+Web feed reader.
+Very powerful and easy to use.
+Also check out [[https://github.com/remyhonig/elfeed-org][elfeed-org]].
+*** [[https://magit.vc/][Magit]]
+Git porcelain.
+*** [[https://notmuchmail.org/notmuch-emacs/][Notmuch]] or [[https://www.djcbsoftware.nl/code/mu/mu4e.html][mu4e]]
+Modern search and tag-based email clients.
 ** TODO SpicEmacs and Cheese
 Recipe still in the test labs!
 ** License
